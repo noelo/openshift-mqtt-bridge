@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 import paho.mqtt.client as pahoclient
-import ssl, pprint, time,sys,errno,socket
+import ssl, pprint, time,sys,errno,socket,argparse
 from threading import Thread
 
 
@@ -116,9 +116,18 @@ def on_log(client, userdata, level, buf):
 def on_subscribe(client, userdata, mid, granted_qos):
     print('Subscribe  ',mid,granted_qos)
 
-def readSBS1FromHost(sock,client):
-    for line in sock.makefile('r'):
-	    client.publish('/topic/flightinfo',line)
+def readSBS1FromHost(client):
+    while True:
+        try:
+            flight_socket=socket.create_connection(('192.168.1.230',30003))
+            for line in flight_socket.makefile('r'):
+	            client.publish('/topic/flightinfo',line)
+        except:
+            print('Exception during read ',sys.exc_info()[0])
+        print('Exiting read...reattaching in 20 seconds')
+        time.sleep(20)
+
+
 
 
 
@@ -137,9 +146,7 @@ client.on_publish = on_publish
 # client.connect("amq2-noconnor.rhcloud.com", 2306)
 client.connect("172.16.58.10", 1883)
 
-flight_socket=socket.create_connection(('192.168.1.230',30003))
-
-worker = Thread(target=readSBS1FromHost,args=(flight_socket,client,))
+worker = Thread(target=readSBS1FromHost,args=(client,))
 worker.setDaemon(True)
 worker.start()
 
