@@ -141,10 +141,10 @@ client.on_log = on_log
 client.on_disconnect = on_disconnect
 client.on_publish = on_publish
 
-# client.tls_set("/tmp/server.crt")
-# client.username_pw_set('admin', 'admin123456')
-# client.connect("amq2-noconnor.rhcloud.com", 2306)
-client.connect("172.16.58.10", 1883)
+client.tls_set("server.crt")
+client.username_pw_set('admin', 'admin123456')
+client.connect("amq2-noconnor.rhcloud.com", 2306)
+#client.connect("172.16.58.10", 1883)
 
 worker = Thread(target=readSBS1FromHost,args=(client,))
 worker.setDaemon(True)
